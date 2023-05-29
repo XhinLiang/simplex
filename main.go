@@ -19,32 +19,39 @@ func init() {
 	flag.Parse()
 }
 
-func main() {
-	// Config file handling
-	if configFile == "" {
-		if _, err := os.Stat(".simplex.json"); err == nil {
-			configFile = ".simplex.json"
-		} else if _, err := os.Stat(".simplex.jsonc"); err == nil {
-			configFile = ".simplex.jsonc"
-		} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.json")); err == nil {
-			configFile = filepath.Join(os.Getenv("HOME"), ".simplex.json")
-		} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")); err == nil {
-			configFile = filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")
-		} else {
-			fmt.Println("No configuration file found. Please provide one using the -c option.")
-			os.Exit(1)
-		}
+func parseConfigFile() string {
+	if configFile != "" {
+		return configFile
 	}
 
+	if _, err := os.Stat(".simplex.json"); err == nil {
+		return ".simplex.json"
+	} else if _, err := os.Stat(".simplex.jsonc"); err == nil {
+		return ".simplex.jsonc"
+	} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.json")); err == nil {
+		return filepath.Join(os.Getenv("HOME"), ".simplex.json")
+	} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")); err == nil {
+		return filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")
+	}
+	fmt.Println("No configuration file found. Please provide one using the -c option.")
+	os.Exit(1)
+	return ""
+}
+
+func main() {
+	// Config file handling
+	configFilePath := parseConfigFile()
+
 	// Load configuration file
-	configData, err := os.ReadFile(configFile)
+	configData, err := os.ReadFile(configFilePath)
 	if err != nil {
 		fmt.Printf("Error reading configuration file: %s\n", err)
 		os.Exit(1)
+		return
 	}
 
 	// If it is a JSONC file, convert it to JSON
-	if filepath.Ext(configFile) == ".jsonc" {
+	if filepath.Ext(configFilePath) == ".jsonc" {
 		configData = jsonc.ToJSON(configData)
 	}
 
@@ -53,6 +60,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error creating simplifier: %s\n", err)
 		os.Exit(1)
+		return
 	}
 
 	// Create a new Scanner that scans os.Stdin.
@@ -62,8 +70,7 @@ func main() {
 
 		// Attempt to unmarshal input JSON as a map
 		var original map[string]interface{}
-		err := json.Unmarshal([]byte(input), &original)
-		if err != nil {
+		if err := json.Unmarshal([]byte(input), &original); err != nil {
 			// If that fails, attempt to unmarshal as an array
 			var originalArr []interface{}
 			err = json.Unmarshal([]byte(input), &originalArr)
@@ -71,26 +78,27 @@ func main() {
 				// If that also fails, exit
 				fmt.Printf("Error decoding JSON: %s\n", err)
 				os.Exit(1)
-			} else {
-				// Simplify each object in the array
-				var simplifiedArr []interface{}
-				for _, obj := range originalArr {
-					simplified, err := simplifier.Simplify(obj)
-					if err != nil {
-						fmt.Printf("Error simplifying JSON: %s\n", err)
-						os.Exit(1)
-					}
-					simplifiedArr = append(simplifiedArr, simplified)
-				}
-				// Output the simplified array
-				simplifiedJSON, err := json.Marshal(simplifiedArr)
+				return
+			}
+
+			// Simplify each object in the array
+			var simplifiedArr []interface{}
+			for _, obj := range originalArr {
+				simplified, err := simplifier.Simplify(obj)
 				if err != nil {
-					fmt.Printf("Error encoding JSON: %s\n", err)
+					fmt.Printf("Error simplifying JSON: %s\n", err)
 					os.Exit(1)
 				}
-				fmt.Println(string(simplifiedJSON))
-				continue
+				simplifiedArr = append(simplifiedArr, simplified)
 			}
+			// Output the simplified array
+			simplifiedJSON, err := json.Marshal(simplifiedArr)
+			if err != nil {
+				fmt.Printf("Error encoding JSON: %s\n", err)
+				os.Exit(1)
+			}
+			fmt.Println(string(simplifiedJSON))
+			continue
 		}
 
 		// Simplify JSON
