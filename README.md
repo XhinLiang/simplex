@@ -24,8 +24,8 @@ In this command, `config.json` is a JSON file containing your simplification rul
 
 If no `-c` option is provided, `simplex` will look for a configuration file in the following locations, in order:
 
-1. `.simplex.json` in the current directory.
-2. `~/.simplex.json` in the user's home directory.
+1. `.simplex.json` or `.simplex.jsonc` in the current directory.
+2. `~/.simplex.json` or `~/.simplex.jsonc` in the user's home directory.
 
 If no configuration file is found in any of these locations, `simplex` will print an error message and exit.
 
