@@ -1,6 +1,3 @@
-Here's a simple README template you can use for your `simplex` program:
-
-```markdown
 # Simplex
 
 Simplex is a command line interface (CLI) program written in Go that simplifies JSON objects according to a set of provided rules.
