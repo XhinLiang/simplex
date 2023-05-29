@@ -51,9 +51,9 @@ The configuration file is a JSON file that contains your simplification rules. I
 	}
 ```
 
-In this example, any property named `Field1` will be removed from the input JSON.
+In this example, root property named `Test` or `Debug` will be removed from the input JSON.
 
-You can check https://github.com/XhinLiang/gosimplifier/blob/main/simplifier_test.go to explore more example of config file.
+You can check https://github.com/XhinLiang/gosimplifier/blob/main/simplifier_test.go to explore more examples of config file.
 
 # Contact
 
