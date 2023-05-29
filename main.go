@@ -60,12 +60,37 @@ func main() {
 	for scanner.Scan() {
 		input := scanner.Text()
 
-		// Unmarshal input JSON
+		// Attempt to unmarshal input JSON as a map
 		var original map[string]interface{}
 		err := json.Unmarshal([]byte(input), &original)
 		if err != nil {
-			fmt.Printf("Error decoding JSON: %s\n", err)
-			os.Exit(1)
+			// If that fails, attempt to unmarshal as an array
+			var originalArr []interface{}
+			err = json.Unmarshal([]byte(input), &originalArr)
+			if err != nil {
+				// If that also fails, exit
+				fmt.Printf("Error decoding JSON: %s\n", err)
+				os.Exit(1)
+			} else {
+				// Simplify each object in the array
+				var simplifiedArr []interface{}
+				for _, obj := range originalArr {
+					simplified, err := simplifier.Simplify(obj)
+					if err != nil {
+						fmt.Printf("Error simplifying JSON: %s\n", err)
+						os.Exit(1)
+					}
+					simplifiedArr = append(simplifiedArr, simplified)
+				}
+				// Output the simplified array
+				simplifiedJSON, err := json.Marshal(simplifiedArr)
+				if err != nil {
+					fmt.Printf("Error encoding JSON: %s\n", err)
+					os.Exit(1)
+				}
+				fmt.Println(string(simplifiedJSON))
+				continue
+			}
 		}
 
 		// Simplify JSON
