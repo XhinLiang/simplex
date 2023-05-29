@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/xhinliang/gosimplifier"
+	"muzzammil.xyz/jsonc"
 )
 
 var configFile string
@@ -19,11 +20,16 @@ func init() {
 }
 
 func main() {
+	// Config file handling
 	if configFile == "" {
 		if _, err := os.Stat(".simplex.json"); err == nil {
 			configFile = ".simplex.json"
+		} else if _, err := os.Stat(".simplex.jsonc"); err == nil {
+			configFile = ".simplex.jsonc"
 		} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.json")); err == nil {
 			configFile = filepath.Join(os.Getenv("HOME"), ".simplex.json")
+		} else if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")); err == nil {
+			configFile = filepath.Join(os.Getenv("HOME"), ".simplex.jsonc")
 		} else {
 			fmt.Println("No configuration file found. Please provide one using the -c option.")
 			os.Exit(1)
@@ -31,14 +37,19 @@ func main() {
 	}
 
 	// Load configuration file
-	config, err := os.ReadFile(configFile)
+	configData, err := os.ReadFile(configFile)
 	if err != nil {
 		fmt.Printf("Error reading configuration file: %s\n", err)
 		os.Exit(1)
 	}
 
+	// If it is a JSONC file, convert it to JSON
+	if filepath.Ext(configFile) == ".jsonc" {
+		configData = jsonc.ToJSON(configData)
+	}
+
 	// Create new simplifier
-	simplifier, err := gosimplifier.NewSimplifier(string(config))
+	simplifier, err := gosimplifier.NewSimplifier(string(configData))
 	if err != nil {
 		fmt.Printf("Error creating simplifier: %s\n", err)
 		os.Exit(1)
