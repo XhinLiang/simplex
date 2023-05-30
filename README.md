@@ -33,7 +33,7 @@ If no configuration file is found in any of these locations, `simplex` will prin
 
 The configuration file is a JSON file that contains your simplification rules. It must have the following format:
 
-```json
+```
 {
   // $ = root
   "remove_properties": [ "test", "debug" ],
