@@ -35,20 +35,28 @@ The configuration file is a JSON file that contains your simplification rules. I
 
 ```json
 {
-	"remove_properties": [ "Test", "Debug" ],
-		"property_simplifiers": {
-			"Data": {
-				"remove_properties": [ "DataTest", "DataDebug" ]
-			},
-			"EntityList": {
-				"property_simplifiers": {
-					"SubProperties": {
-						"remove_properties": [ "ABC", "DEF" ]
-					}
-				}
-			}
-		}
-	}
+  // $ = root
+  "remove_properties": [ "test", "debug" ],
+  "property_rules": {
+    "data": { // rule for $.data(if object) or $.data[0], $.data[1] ...(if array)
+      // $ = $.data or $.data[0] or $.data[1] ...
+      "remove_properties": [ "data_test", "data_debug" ],
+      "property_rules": {
+        // nested
+      }
+    },
+    "entity_list": { // rule for $.entity_list(if object) or $.entity_list[0], $.entity_list[1] ....(if array)
+      // $ = $.entity_list or $.entity_list[0] or $.entity_list[1] ...
+      "remove_properties": [ "entity_test" ],
+      "property_rules": {
+        "sub_properties": { // rule for $.entity_list[0].sub_properties(if object) or $.entity_list[0].sub_properties[0], $.entity_list[0].sub_properties[1] ...(if array)
+          // $ = $.entity_list.sub_properties or $.entity_list[0].sub_properties[0] or $.entity_list[0].sub_properties[1] ...
+          "remove_properties": [ "abc", "def" ] // remove $.abc and $.def
+        }
+      }
+    }
+  }
+}
 ```
 
 In this example, root property named `Test` or `Debug` will be removed from the input JSON.
