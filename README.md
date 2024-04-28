@@ -1,6 +1,6 @@
 # Simplex
 
-Simplex is a command line interface (CLI) program written in Go that simplifies JSON objects according to a set of provided rules.
+Simplex simplifies JSON objects according to a set of provided rules.
 
 ## Installation
 
